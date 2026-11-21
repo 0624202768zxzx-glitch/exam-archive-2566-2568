@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คลังแนวข้อสอบนักศึกษา (2566 - 2568)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            color: white;
+            padding: 2.5rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary);
+        }
+
+        .year-filters {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.25rem;
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--text-main);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .exam-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .exam-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .exam-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+        .badge-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .badge {
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .badge-year {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-term {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .exam-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .exam-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-download {
+            display: block;
+            text-align: center;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-download:hover {
+            background: var(--primary-hover);
+        }
+
+        .status-box, .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+            grid-column: 1 / -1;
+        }
+
+        .empty-state {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>📚 คลังแนวข้อสอบนักศึกษา</h1>
+        <p>รวบรวมแนวข้อสอบและสรุปเนื้อหา ประจำปีการศึกษา 2566 - 2568 (เชื่อม Google Drive & Sheets)</p>
+    </header>
+
+    <div class="container">
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 ค้นหารหัสวิชา หรือ ชื่อรายวิชา (เช่น CS101, แคลคูลัส)...">
+            </div>
+            <div class="year-filters" id="yearFilters">
+                <button class="filter-btn active" data-year="all">ทั้งหมด</button>
+                <button class="filter-btn" data-year="2568">ปี 2568</button>
+                <button class="filter-btn" data-year="2567">ปี 2567</button>
+                <button class="filter-btn" data-year="2566">ปี 2566</button>
+            </div>
+        </div>
+
+        <div class="exam-grid" id="examGrid">
+            <div class="status-box" id="loadingBox">กำลังโหลดข้อมูลแนวข้อสอบ...</div>
+        </div>
+        <div class="empty-state" id="emptyState">ไม่พบแนวข้อสอบที่ค้นหา ลองเปลี่ยนคำค้นหาหรือปีการศึกษาดูนะ</div>
+    </div>
+
+    <script>
+        // นำลิงก์ CSV ที่ได้จาก Google Sheets -> File -> Share -> Publish to web มาวางที่นี่
+        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTvYBgRvhmdkdvDqpAFPnymZMDfTfJja-OCYzu0mMY-RzYPhoSemK3ATf44xjnIVg68cXOC56p1cxLj/pub?gid=0&single=true&output=csv";
+
+        let examData = [];
+        let currentYear = 'all';
+        let searchQuery = '';
+
+        const examGrid = document.getElementById('examGrid');
+        const loadingBox = document.getElementById('loadingBox');
+        const searchInput = document.getElementById('searchInput');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const emptyState = document.getElementById('emptyState');
+
+        // แปลงข้อความ CSV อย่างง่าย (รองรับเครื่องหมายคำพูด "..." และจุลภาค)
+        function parseCSV(csvText) {
+            const rows = [];
+            let row = [];
+            let cell = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < csvText.length; i++) {
+                const char = csvText[i];
+                const nextChar = csvText[i + 1];
+
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        cell += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    row.push(cell.trim());
+                    cell = '';
+                } else if ((char === '\n' || char === '\r') && !inQuotes) {
+                    if (char === '\r' && nextChar === '\n') i++;
+                    row.push(cell.trim());
+                    if (row.some(item => item !== '')) rows.push(row);
+                    row = [];
+                    cell = '';
+                } else {
+                    cell += char;
+                }
+            }
+            if (cell.length > 0 || row.length > 0) {
+                row.push(cell.trim());
+                if (row.some(item => item !== '')) rows.push(row);
+            }
+
+            if (rows.length < 2) return [];
+
+            const headers = rows[0].map(h => h.toLowerCase());
+            return rows.slice(1).map(r => {
+                const obj = {};
+                headers.forEach((h, idx) => {
+                    obj[h] = r[idx] || '';
+                });
+                return obj;
+            });
+        }
+
+        async function loadExamsFromSheet() {
+            if (!SHEET_CSV_URL || SHEET_CSV_URL.includes("PASTE_YOUR_PUBLISHED_GOOGLE_SHEET_CSV_URL_HERE")) {
+                loadingBox.innerHTML = `
+                    <strong>ยังไม่ได้ใส่ลิงก์ Google Sheets CSV</strong><br>
+                    กรุณาเผยแพร่ชีตเป็น CSV แล้วนำลิงก์มาใส่ในตัวแปร <code>SHEET_CSV_URL</code> ในโค้ดครับ
+                `;
+                return;
+            }
+
+            try {
+                // เพิ่ม timestamp ป้องกันเบราว์เซอร์แคชข้อมูลเก่า
+                const urlWithCacheBust = `${SHEET_CSV_URL}${SHEET_CSV_URL.includes('?') ? '&' : '?'}t=${Date.now()}`;
+                const res = await fetch(urlWithCacheBust);
+                if (!res.ok) throw new Error('ไม่สามารถโหลดข้อมูลจากชีตได้');
+
+                const csvText = await res.text();
+                examData = parseCSV(csvText).filter(item => item.code || item.title);
+                renderExams();
+            } catch (err) {
+                loadingBox.innerHTML = `เกิดข้อผิดพลาดในการดึงข้อมูล: ${err.message}<br>ตรวจสอบว่าเผยแพร่ชีตเป็น CSV แล้วและเปิดผ่าน Live Server / เว็บเซิร์ฟเวอร์`;
+            }
+        }
+
+        function renderExams() {
+            examGrid.innerHTML = '';
+
+            const filtered = examData.filter(exam => {
+                const year = String(exam.year || '');
+                const code = String(exam.code || '');
+                const title = String(exam.title || '');
+                const desc = String(exam.desc || '');
+
+                const matchYear = currentYear === 'all' || year === currentYear;
+                const matchText =
+                    title.toLowerCase().includes(searchQuery) ||
+                    code.toLowerCase().includes(searchQuery) ||
+                    desc.toLowerCase().includes(searchQuery);
+
+                return matchYear && matchText;
+            });
+
+            if (filtered.length === 0) {
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+                filtered.forEach(exam => {
+                    const card = document.createElement('div');
+                    card.className = 'exam-card';
+                    const safeLink = exam.link && exam.link.startsWith('http') ? exam.link : '#';
+                    card.innerHTML = `
+                        <div>
+                            <div class="badge-group">
+                                <span class="badge badge-year">ปี ${exam.year || '-'}</span>
+                                <span class="badge badge-term">${exam.term || '-'}</span>
+                            </div>
+                            <h3 class="exam-title">${exam.code ? exam.code + ' - ' : ''}${exam.title || 'ไม่มีชื่อวิชา'}</h3>
+                            <p class="exam-desc">${exam.desc || ''}</p>
+                        </div>
+                        <a href="${safeLink}" target="_blank" rel="noopener noreferrer" class="btn-download">📁 เปิดดูไฟล์ใน Google Drive</a>
+                    `;
+                    examGrid.appendChild(card);
+                });
+            }
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value.toLowerCase().trim();
+            renderExams();
+        });
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentYear = btn.getAttribute('data-year');
+                renderExams();
+            });
+        });
+
+        loadExamsFromSheet();
+    </script>
+</body>
+</html>
